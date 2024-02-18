@@ -1,11 +1,12 @@
 <?php
 
 use Illuminate\Http\Request;
+use App\Models\CryptoAccount;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\UserAuthController;
 use App\Http\Controllers\CryptoAccountController;
-use App\Http\Controllers\UserController;
-use App\Models\CryptoAccount;
 
 /*
 |--------------------------------------------------------------------------
