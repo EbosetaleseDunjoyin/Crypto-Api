@@ -217,8 +217,8 @@
                     }
                 }
             },
-             "security":[
-              "api_token"
+            "security": [
+              { "api_token": [] }
             ]
         }
     },
@@ -258,8 +258,8 @@
                     
                 }
             },
-            "security":[
-              "api_token"
+           "security": [
+              { "api_token": [] }
             ]
                 
             
@@ -338,8 +338,8 @@
                     
                 }
             },
-            "security":[
-              "api_token"
+           "security": [
+              { "api_token": [] }
             ]
             
         }
@@ -417,8 +417,8 @@
                     
                 }
             },
-             "security":[
-              "api_token"
+            "security": [
+              { "api_token": [] }
             ]
             
         }
@@ -488,8 +488,8 @@
                     
                 }
             },
-             "security":[
-              "api_token"
+            "security": [
+              { "api_token": [] }
             ]
             
         }

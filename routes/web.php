@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,16 +14,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('web')->group(function () {
-    Route::get('/documentation', function () {
-         return view('documentation');
-     });
-});
+// Route::middleware('bypassCsrf')->group(function () {
+
+// });
+Route::get('documentation', [PageController::class, 'documentation_page']);
 
 
-Route::get('login', function () {
-    return response()->json([
-        'status' => false,
-        'message' => 'Unauthorised',
-    ], 401);
-})->name('login');
+Route::get('login', [PageController::class, 'login_page'])->name('login');
