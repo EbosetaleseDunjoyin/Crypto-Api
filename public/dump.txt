@@ -1,0 +1,86 @@
+//Swap former <i class="fa fa-code" aria-hidden="true"></i>
+
+public function swaps_crypto_coin(CryptoAccountSwapCoinRequest $request, CryptoAccountService $cryptoAccountService)
+    {
+        $amount = $request->amount;
+        $user = User::where('email', $request->email)->with("cryptoAccounts")->first();
+
+        $userCryptoAccount = $user->cryptoAccounts()->where('coin_id', $request->coin_id)->first();
+        $receiverCryptoAccount = $user->cryptoAccounts()->where('coin_id', $request->receiver_coin_id)->first();
+
+        if (!$userCryptoAccount) {
+            CryptoAccount::create([
+                "user_id" => $user->id,
+                "coin_id" => $request->coin_id
+            ]);
+
+            return response()->json([
+                'status' => false,
+                'message' => "User Crypto account for {$request->coin_id} is empty",
+            ], 400);
+        }
+
+        if (!$receiverCryptoAccount) {
+            CryptoAccount::create([
+                "user_id" => $user->id,
+                "coin_id" => $request->receiver_coin_id
+            ]);
+        }
+
+        $receiver_coin_data = Coin::get_coin_data($request->receiver_coin_id);
+
+        $cost_price = $receiver_coin_data['market_data']['current_price']['usd'];
+        $balance = $userCryptoAccount->balance;
+        if (!($balance >= $amount)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Insufficient balance',
+            ], 400);
+        }
+
+        if ($cost_price) {
+            try {
+                $balance = $amount / $cost_price  ; 
+
+                DB::beginTransaction();
+
+                $userCryptoAccount->decrement('balance', $amount);
+                $receiverCryptoAccount->increment('balance', $balance);
+
+                Transaction::create([
+                    'user_id' => $userCryptoAccount->user_id,
+                    'crypto_account_id' => $userCryptoAccount->id,
+                    'coin_id' => $request->coin_id,
+                    'amount' => $amount,
+                    'transaction_type' => 'debit'
+                ]);
+
+                Transaction::create([
+                    'user_id' => $receiverCryptoAccount->user_id,
+                    'crypto_account_id' => $receiverCryptoAccount->id,
+                    'coin_id' => $request->receiver_coin_id, // Use receiver coin ID here
+                    'amount' => $balance,
+                    'transaction_type' => 'credit'
+                ]);
+
+                DB::commit();
+
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Coins swapped successfully.',
+                ], 200);
+            } catch (\Exception $e) {
+                DB::rollBack();
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Transaction failed. Please try again later.',
+                ], 500);
+            }
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'An issue occurred',
+            ], 400);
+        }
+    }
